@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>を</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="main.js" defer></script> 
+  </head>
+  <body>
+    <div class="container">
+      <h1>を<span id="randomTitleText"></span></h1>
+      
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="文字を入力してください" autocomplete="off" value="" />
+        
+        <div class="toggle-switch">
+          <input type="radio" id="typeNoun" name="searchType" value="noun" checked>
+          <label for="typeNoun">名</label>
+          
+          <input type="radio" id="typeVerb" name="searchType" value="verb">
+          <label for="typeVerb">動</label>
+        </div>
+
+        <button id="searchBtn">検索</button>
+      </div>
+
+      <div class="result-header">
+        <p></p>
+      </div>
+
+      <div id="resultArea">
+        <ul class="main-list">
+        </ul>
+      </div>
+
+    </div>
+  </body>
+</html>

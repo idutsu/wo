@@ -1,0 +1,204 @@
+@charset "UTF-8";
+
+/* ＝＝＝ ベース設定 ＝＝＝ */
+:root {
+  /* カラーパレットの定義 */
+  --bg-color: black;       /* 背景：非常に暗い黒緑色 */
+  
+  /* 蛍光感を抑えた、少し落ち着いたターミナルグリーンに変更 */
+  --text-color: green;     
+  --accent-color: green;   /* アクセント色も統一して落ち着かせる */
+  --border-color: green;   /* ボーダー色 */
+  
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Courier New", Consolas, "Lucida Console", monospace;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+
+.container {
+  padding: 20px;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+.search-box {
+  display: flex;
+  align-items: stretch;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+#searchInput {
+  width:300px;
+  padding: 6px;
+  font-size: 1.2rem;
+  font-family: inherit;
+  color: var(--text-color);
+  background-color: #000;
+  border: 1px solid var(--border-color);
+  outline: none;
+}
+
+#searchInput::placeholder {
+  color: rgba(51, 199, 32, 0.5);
+}
+
+.toggle-switch {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.toggle-switch input[type="radio"] {
+  display: none;
+}
+
+.toggle-switch label {
+  display: flex;
+  align-items: center; /* ★追加：文字を縦の中央に配置 */
+  padding: 0 16px; /* 上下の余白を削る */
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-color);
+  height: 100%; /* ★追加：高さを100%に */
+}
+
+.toggle-switch input[type="radio"]:checked + label {
+  background-color: var(--accent-color);
+  color: #000;
+}
+
+/* メインの検索ボタン */
+#searchBtn {
+  padding: 0 24px; /* 上下の余白を削る */
+  font-family: inherit;
+  background-color: var(--bg-color);
+  color: var(--accent-color);
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: 1px solid var(--accent-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#searchBtn:hover {
+  background-color: var(--accent-color);
+  color: #000;
+  box-shadow: 0 0 8px var(--shadow-color);
+}
+
+/* ホバー時に反転 */
+#searchBtn:hover {
+  background-color: var(--accent-color);
+  color: #000;
+  box-shadow: 0 0 8px var(--shadow-color);
+}
+
+/* ＝＝＝ 検索結果エリア ＝＝＝ */
+.result-header {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 5px;
+  display: inline-block;
+}
+
+#currentWord {
+  font-weight: bold;
+}
+
+ul {
+  list-style: none;
+}
+
+.item-content {
+  display: inline-block;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: bold;
+  padding:2px;
+  cursor: pointer;
+}
+
+.item-content:hover {
+  background-color: var(--text-color);
+  color: var(--bg-color);
+}
+
+.toggle-icon {
+  user-select: none;
+}
+
+.sub-list {
+  margin-top: 10px;
+  margin-left: 30px;
+  border-left: 1px dashed var(--border-color); 
+  padding-left: 15px;
+}
+
+.sub-list li.load-more-container {
+  margin-bottom: 20px;
+}
+
+.search, .delete {
+  display: none;
+}
+
+.item-content:hover .delete, .item-content:hover .search {
+  display: inline-block;
+}
+
+.item-content .delete:hover, .item-content .search:hover {
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+
+.load-more-container {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.load-more-btn {
+  font-family: inherit;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border: 1px dashed var(--text-color);
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  background-color: var(--text-color);
+  color: var(--bg-color);
+}
+
+.load-more-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#randomTitleText {
+  font-size: 1rem;
+  margin-left: 10px;
+}
