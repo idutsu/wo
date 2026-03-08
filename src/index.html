@@ -1,39 +1,28 @@
 <!doctype html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>を</title>
-    <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="main.js" defer></script> 
-  </head>
-  <body>
-    <div class="container">
-      <h1>を<span id="randomTitleText"></span></h1>
-      
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="文字を入力してください" autocomplete="off" value="" />
-        
-        <div class="toggle-switch">
-          <input type="radio" id="typeNoun" name="searchType" value="noun" checked>
-          <label for="typeNoun">名</label>
-          
-          <input type="radio" id="typeVerb" name="searchType" value="verb">
-          <label for="typeVerb">動</label>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>を研究所</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script type="module" src="main.js" defer></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>を研究所</h1>
+            <div id="searchBox">
+                <button id="wikiBtn" class="main-btn">例文</button>
+                <button id="nounBtn" class="main-btn" data-table="noun">名詞</button>
+                <button id="verbBtn" class="main-btn" data-table="verb">動詞</button>
+                <button id="sentBtn" class="main-btn">を文</button>
+                <button id="randomBtn" class="main-btn">作文</button>
+                <input type="text" id="registerNounInput" class="main-input" data-table="noun" placeholder="名詞" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                <input type="text" id="registerVerbInput" class="main-input" data-table="verb" placeholder="動詞" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                <button id="registerBtn" class="main-btn">登録</button>
+            </div>
+            <div id="resultArea">
+                <ul id="mainList"></ul>
+            </div>
         </div>
-
-        <button id="searchBtn">検索</button>
-      </div>
-
-      <div class="result-header">
-        <p></p>
-      </div>
-
-      <div id="resultArea">
-        <ul class="main-list">
-        </ul>
-      </div>
-
-    </div>
-  </body>
+    </body>
 </html>
