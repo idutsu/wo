@@ -2,11 +2,11 @@
     "$schema": "https://schema.tauri.app/config/2",
     "productName": "wo",
     "version": "0.1.0",
-    "identifier": "com.idutsu",
+    "identifier": "com.idutsu.wo",
     "build": {
         "beforeDevCommand": "npm run dev",
         "devUrl": "http://localhost:5173",
-        "frontendDist": "../dist"
+        "frontendDist": "../src/dist"
     },
     "app": {
         "withGlobalTauri": true,
@@ -24,7 +24,8 @@
     },
     "bundle": {
         "active": true,
-        "targets": "all",
-        "icon": ["../src/assets/icons/favicon-32x32.png", "../src/assets/icons/favicon.ico"]
+        "targets": ["nsis"],
+        "icon": ["../src/assets/icons/favicon-32x32.png", "../src/assets/icons/favicon.ico"],
+        "resources": ["../pairs.sqlite3"]
     }
 }

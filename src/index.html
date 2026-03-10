@@ -9,20 +9,22 @@
     </head>
     <body>
         <div class="container">
-            <h1>を研究所</h1>
-            <div id="searchBox">
-                <button id="wikiBtn" class="main-btn">例文</button>
-                <button id="nounBtn" class="main-btn" data-table="noun">名詞</button>
-                <button id="verbBtn" class="main-btn" data-table="verb">動詞</button>
-                <button id="sentBtn" class="main-btn">を文</button>
-                <button id="randomBtn" class="main-btn">作文</button>
-                <input type="text" id="registerNounInput" class="main-input" data-table="noun" placeholder="名詞" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-                <input type="text" id="registerVerbInput" class="main-input" data-table="verb" placeholder="動詞" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-                <button id="registerBtn" class="main-btn">登録</button>
-            </div>
-            <div id="resultArea">
+            <header>
+                <h1>を研究所</h1>
+                <div id="searchBox">
+                    <button id="wikiBtn" class="main-btn">例文</button>
+                    <button id="nounBtn" class="main-btn" data-table="noun">名詞</button>
+                    <button id="verbBtn" class="main-btn" data-table="verb">動詞</button>
+                    <button id="randomBtn" class="main-btn">作文</button>
+                    <button id="sentBtn" class="main-btn">お気に入り</button>
+                    <input type="text" id="registerNounInput" class="main-input" data-table="noun" placeholder="名詞" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                    <input type="text" id="registerVerbInput" class="main-input" data-table="verb" placeholder="動詞" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                    <button id="registerBtn" class="main-btn">登録</button>
+                </div>
+            </header>
+            <main id="resultArea">
                 <ul id="mainList"></ul>
-            </div>
+            </main>
         </div>
     </body>
 </html>

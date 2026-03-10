@@ -1,3 +1,5 @@
 *.psd
 *.fla
 .env
+.env.development
+dist

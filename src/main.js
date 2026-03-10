@@ -36,17 +36,13 @@ async function handleGetExampleSentencesClick(e) {
             const isNounExist = nounSet.has(noun);
             const isVerbExist = verbSet.has(verb);
 
-            const nounBtn = isNounExist ? `<button class="delete-word-btn" data-table="noun" data-target="verb" data-word="${noun}">${noun}</button>` : `<button class="good-word-btn" data-table="noun" data-target="verb" data-word="${noun}">${noun}</button>`;
-            const verbBtn = isVerbExist ? `<button class="delete-word-btn" data-table="verb" data-target="noun" data-word="${verb}">${verb}</button>` : `<button class="good-word-btn" data-table="verb" data-word="${verb}">${verb}</button>`;
+            const nounBtn = isNounExist ? `<button class="delete-word-btn" data-table="noun" data-word="${noun}">${noun}</button>` : `<button class="good-word-btn" data-table="noun" data-word="${noun}">${noun}</button>`;
+            const verbBtn = isVerbExist ? `<button class="delete-word-btn" data-table="verb" data-word="${verb}">${verb}</button>` : `<button class="good-word-btn" data-table="verb" data-word="${verb}">${verb}</button>`;
 
             const li = document.createElement("li");
             li.innerHTML = `${nounBtn}<span class="particle">を</span>${verbBtn}`;
 
-            const separator = document.createElement("span");
-            separator.textContent = " / ";
-
             fragment.appendChild(li);
-            fragment.appendChild(separator);
         }
 
         mainList.innerHTML = "";
@@ -54,6 +50,7 @@ async function handleGetExampleSentencesClick(e) {
     } catch (error) {
         console.error("エラー：", error);
     } finally {
+        setCurrentList();
         enableAllButtons();
     }
 }
@@ -93,17 +90,15 @@ async function handleGenerateSentencesClick(e) {
 
             const li = document.createElement("li");
             li.innerHTML = `<button class="${sentBtnClass}" data-table="sent" data-noun="${noun}" data-verb="${verb}">${noun}を${verb}</button>`;
-            const span = document.createElement("span");
-            span.textContent = "/";
 
             fragment.appendChild(li);
-            fragment.appendChild(span);
         }
 
         mainList.appendChild(fragment);
     } catch (error) {
         console.error("エラー：", error);
     } finally {
+        setCurrentList();
         enableAllButtons();
     }
 }
@@ -123,13 +118,12 @@ async function handleGetFavoriteSentencesClick(e) {
             const verb = sentList[i].verb || sentList[i][1];
             const li = document.createElement("li");
             li.innerHTML = `<button class="delete-sent-btn" data-table="sent" data-noun="${noun}" data-verb="${verb}">${noun}を${verb}</button>`;
-            const span = document.createElement("span");
-            span.textContent = "/";
-            mainList.prepend(li, span);
+            mainList.prepend(li);
         }
     } catch (error) {
         console.error("エラー：", error);
     } finally {
+        setCurrentList();
         enableAllButtons();
     }
 }
@@ -153,15 +147,14 @@ async function handleGetFavoriteWordsClick(e) {
             const word = wordList[i].word || wordList[i][0];
             const li = document.createElement("li");
             li.innerHTML = `<button class="delete-word-btn" data-table="${table}" data-target="${getTable}" data-word="${word}">${word}</button>`;
-            const span = document.createElement("span");
-            span.textContent = "/";
-            fragment.prepend(li, span);
+            fragment.prepend(li);
         }
 
         mainList.appendChild(fragment);
     } catch (error) {
         console.error("エラー：", error);
     } finally {
+        setCurrentList();
         enableAllButtons();
     }
 }
@@ -169,7 +162,6 @@ async function handleGetFavoriteWordsClick(e) {
 //単語（名詞 OR 動詞）を含む文を生成する
 async function handleGetSentencesWithWordClick(e) {
     if (e.target.dataset.target) {
-        e.preventDefault();
         const target = e.target.dataset.target;
 
         if (target === "noun") {
@@ -190,13 +182,12 @@ async function handleGetSentencesWithWordClick(e) {
                 const word = wordList[i].word || wordList[i][0];
                 const li = document.createElement("li");
                 li.innerHTML = targetTable === "noun" ? `<button class="good-sent-btn" data-table="sent" data-noun="${word}" data-verb="${withWord}">${word}を${withWord}</button>` : `<button class="good-sent-btn" data-table="sent" data-noun="${withWord}" data-verb="${word}">${withWord}を${word}</button>`;
-                const span = document.createElement("span");
-                span.textContent = "/";
-                mainList.prepend(li, span);
+                mainList.prepend(li);
             }
         } catch (error) {
             console.error("エラー：", error);
         } finally {
+            setCurrentList();
             enableAllButtons();
         }
     }
@@ -205,7 +196,6 @@ async function handleGetSentencesWithWordClick(e) {
 //単語（名詞 OR 動詞）を保存・削除する
 const handleSaveWordClick = async (e) => {
     if (e.target.classList.contains("good-word-btn")) {
-        if (e.detail === 0) return;
         const btn = e.target;
         const table = btn.dataset.table;
         const wordText = btn.dataset.word.trim();
@@ -213,13 +203,12 @@ const handleSaveWordClick = async (e) => {
         if (!wordText) return;
 
         try {
-            await db.select(`INSERT OR IGNORE INTO ${table} (word) VALUES ('${wordText}')`);
+            await db.execute(`INSERT OR IGNORE INTO ${table} (word) VALUES ('${wordText}')`);
             btn.className = "delete-word-btn";
         } catch (error) {
-            console.error("保存失敗：", error);
+            console.error("単語保存失敗：", error);
         }
     } else if (e.target.classList.contains("delete-word-btn")) {
-        if (e.detail === 0) return;
         const btn = e.target;
         const table = btn.dataset.table;
         const wordText = btn.dataset.word.trim();
@@ -230,28 +219,24 @@ const handleSaveWordClick = async (e) => {
             await db.select(`DELETE FROM ${table} WHERE word = '${wordText}'`);
             btn.className = "good-word-btn";
         } catch (error) {
-            console.error("削除失敗：", error);
+            console.error("単語削除失敗：", error);
         }
     }
 };
 
 //文を保存・削除する
 const handleSaveSentenceClick = async (e) => {
-    if (e.detail === 0) return;
-
     if (e.target.classList.contains("good-sent-btn")) {
-        if (e.detail === 0) return;
         const btn = e.target;
         const noun = btn.dataset.noun.trim();
         const verb = btn.dataset.verb.trim();
         try {
-            await db.select(`INSERT OR IGNORE INTO sent (noun, verb) VALUES ('${noun}', '${verb}')`);
+            await db.execute(`INSERT OR IGNORE INTO sent (noun, verb) VALUES ('${noun}', '${verb}')`);
             btn.className = "delete-sent-btn";
         } catch (error) {
-            console.error("保存失敗：", error);
+            console.error("文保存失敗：", error);
         }
     } else if (e.target.classList.contains("delete-sent-btn")) {
-        if (e.detail === 0) return;
         const btn = e.target;
         const noun = btn.dataset.noun.trim();
         const verb = btn.dataset.verb.trim();
@@ -259,11 +244,12 @@ const handleSaveSentenceClick = async (e) => {
             await db.select(`DELETE FROM sent WHERE noun = '${noun}' AND verb = '${verb}'`);
             btn.className = "good-sent-btn";
         } catch (error) {
-            console.error("削除失敗：", error);
+            console.error("文削除失敗：", error);
         }
     }
 };
 
+//入力した名詞・動詞・文を登録する
 const handleRegisterClick = async (e) => {
     const nounInput = document.getElementById("registerNounInput");
     const verbInput = document.getElementById("registerVerbInput");
@@ -274,7 +260,7 @@ const handleRegisterClick = async (e) => {
     if (nounText != "" && verbText === "") {
         if (!nounText) return;
         try {
-            await db.select(`INSERT OR IGNORE INTO noun (word) VALUES ('${nounText}')`);
+            await db.execute(`INSERT OR IGNORE INTO noun (word) VALUES ('${nounText}')`);
             nounInput.value = "";
         } catch (error) {
             console.error("名詞登録失敗：", error);
@@ -282,7 +268,7 @@ const handleRegisterClick = async (e) => {
     } else if (verbText != "" && nounText === "") {
         if (!verbText) return;
         try {
-            await db.select(`INSERT OR IGNORE INTO verb (word) VALUES ('${verbText}')`);
+            await db.execute(`INSERT OR IGNORE INTO verb (word) VALUES ('${verbText}')`);
             verbInput.value = "";
         } catch (error) {
             console.error("動詞登録失敗：", error);
@@ -290,7 +276,7 @@ const handleRegisterClick = async (e) => {
     } else if (nounText != "" && verbText != "") {
         if (!nounText || !verbText) return;
         try {
-            await db.select(`INSERT OR IGNORE INTO sent (noun, verb) VALUES ('${nounText}', '${verbText}')`);
+            await db.execute(`INSERT OR IGNORE INTO sent (noun, verb) VALUES ('${nounText}', '${verbText}')`);
             nounInput.value = "";
             verbInput.value = "";
         } catch (error) {
@@ -301,11 +287,11 @@ const handleRegisterClick = async (e) => {
 
 const handleKeyup = (e) => {
     if (e.target.id === "registerNounInput" || e.target.id === "registerVerbInput") {
-        if (e.key === "Enter" && !e.isComposing) {
+        if ((e.key === "Enter" && !e.isComposing) || e.key === "Escape") {
             e.target.blur();
         } else {
-            const table = e.target.dataset.table;
             const mainListClass = mainList.className;
+            const table = e.target.dataset.table;
             if ((mainListClass === "fav-word-list noun" && table === "noun") || (mainListClass === "fav-word-list verb" && table === "verb")) {
                 const inputVal = e.target.value.trim();
                 const listItems = mainList.querySelectorAll("li");
@@ -318,10 +304,19 @@ const handleKeyup = (e) => {
                         li.style.display = "none";
                     }
                 });
+                setCurrentList();
             }
         }
     } else {
-        if (e.key === " " || e.key === "　") {
+        if (e.key === "n") {
+            nounInput.focus();
+            nounBtn.click();
+        } else if (e.key === "v") {
+            verbInput.focus();
+            verbBtn.click();
+        } else if (e.key === "r") {
+            registerBtn.click();
+        } else if (e.key === "s") {
             randomBtn.click();
         } else if (e.key === "f") {
             sentBtn.click();
@@ -331,17 +326,111 @@ const handleKeyup = (e) => {
             verbBtn.click();
         } else if (e.key === "a") {
             wikiBtn.click();
-        } else if (e.key === "r") {
-            registerBtn.click();
+        } else if (e.key === "Enter" && e.shiftKey) {
+            const buttons = currentList[currentIndex].querySelectorAll("button");
+            buttons[1]?.click();
         } else if (e.key === "Enter") {
-            if (mainList.className === "fav-word-list noun") {
-                nounInput.focus();
-            } else if (mainList.className === "fav-word-list verb") {
-                verbInput.focus();
+            const buttons = currentList[currentIndex].querySelectorAll("button");
+            buttons[0]?.click();
+        } else if (e.key === " ") {
+            e.preventDefault();
+            const buttons = currentList[currentIndex].querySelectorAll("button");
+            if (buttons[0]) {
+                const rightClickEvent = new MouseEvent("contextmenu", {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    button: 2,
+                });
+                buttons[0].dispatchEvent(rightClickEvent);
             }
         }
     }
 };
+
+const handleKeydown = (e) => {
+    if (e.target.id === "registerNounInput" || e.target.id === "registerVerbInput") return;
+
+    const keys = { right: "ArrowRight", left: "ArrowLeft", up: "ArrowUp", down: "ArrowDown" };
+    if (!Object.values(keys).includes(e.key)) return;
+
+    e.preventDefault();
+
+    if (!currentList) currentList = Array.from(document.querySelectorAll("#mainList li"));
+    if (currentList.length === 0) return;
+
+    const currentItem = currentList[currentIndex];
+    const currentRect = currentItem.getBoundingClientRect();
+    const currentCenterX = currentRect.left + currentRect.width / 2;
+
+    let targetIndex = currentIndex;
+
+    if (e.key === keys.right || e.key === keys.left) {
+        const step = e.key === keys.right ? 1 : -1;
+        for (let i = currentIndex + step; i >= 0 && i < currentList.length; i += step) {
+            if (currentList[i].style.display !== "none") {
+                targetIndex = i;
+                break;
+            }
+        }
+    } else if (e.key === keys.up || e.key === keys.down) {
+        const isDown = e.key === keys.down;
+        const step = isDown ? 1 : -1;
+
+        let closestRowY = null;
+        let minDistanceX = Infinity;
+        let closestIndex = currentIndex;
+
+        for (let i = currentIndex + step; i >= 0 && i < currentList.length; i += step) {
+            if (currentList[i].style.display === "none") continue;
+
+            const rect = currentList[i].getBoundingClientRect();
+
+            const isTargetRow = isDown ? rect.top >= currentRect.bottom - 5 : rect.bottom <= currentRect.top + 5;
+
+            if (isTargetRow) {
+                if (closestRowY === null) closestRowY = rect.top;
+
+                if (Math.abs(rect.top - closestRowY) < 10) {
+                    const centerX = rect.left + rect.width / 2;
+                    const distanceX = Math.abs(centerX - currentCenterX);
+
+                    if (distanceX < minDistanceX) {
+                        minDistanceX = distanceX;
+                        closestIndex = i;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        targetIndex = closestIndex;
+    }
+
+    if (targetIndex !== currentIndex) {
+        currentList[currentIndex].classList.remove("selected");
+        currentIndex = targetIndex;
+        currentList[currentIndex].classList.add("selected");
+        currentList[currentIndex].scrollIntoView({ block: "nearest" });
+    }
+};
+
+function setCurrentList() {
+    currentList = Array.from(document.querySelectorAll("#mainList li"));
+    if (currentList.length === 0) return;
+
+    const currentSelected = document.querySelector("#mainList li.selected");
+    if (currentSelected) {
+        currentSelected.classList.remove("selected");
+    }
+
+    const firstVisibleIndex = currentList.findIndex((li) => li.style.display !== "none");
+
+    if (firstVisibleIndex === -1) return;
+
+    currentIndex = firstVisibleIndex;
+    currentList[currentIndex].classList.add("selected");
+}
 
 function disableAllButtons(currentBtn) {
     const buttons = document.getElementById("searchBox").querySelectorAll("button");
@@ -359,6 +448,13 @@ function enableAllButtons() {
     });
 }
 
+const blockPhysicalMouse = (e) => {
+    if (e.isTrusted) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+};
+
 //初期化
 let db;
 let mainList = null;
@@ -370,16 +466,17 @@ let randomBtn = null;
 let sentBtn = null;
 let wikiBtn = null;
 let registerBtn = null;
+let currentIndex = 0;
+let currentList = null;
 
 window.addEventListener("DOMContentLoaded", async () => {
     try {
         const DB = import.meta.env.VITE_DB;
-        console.log(DB);
         db = await Database.load(DB);
-        console.log("データベース接続完了");
+        console.log("DB接続完了");
     } catch (error) {
-        console.error("データベース接続失敗:", error);
-        document.getElementById("resultArea").innerHTML = `<p style="color:red;">データベース接続失敗: ${error}</p>`;
+        console.error("DB接続失敗:", error);
+        document.getElementById("resultArea").innerHTML = `<p">DB接続失敗：${error}</p>`;
     }
 
     mainList = document.getElementById("mainList");
@@ -399,11 +496,16 @@ window.addEventListener("DOMContentLoaded", async () => {
     verbBtn.addEventListener("click", handleGetFavoriteWordsClick);
     registerBtn.addEventListener("click", handleRegisterClick);
 
+    document.addEventListener("keydown", handleKeydown);
     document.addEventListener("keyup", handleKeyup);
 
     mainList.addEventListener("click", handleSaveWordClick);
     mainList.addEventListener("click", handleSaveSentenceClick);
     mainList.addEventListener("contextmenu", handleGetSentencesWithWordClick);
+
+    window.addEventListener("click", blockPhysicalMouse, { capture: true });
+    window.addEventListener("mousedown", blockPhysicalMouse, { capture: true });
+    window.addEventListener("contextmenu", blockPhysicalMouse, { capture: true });
 
     wikiBtn.click();
 });
