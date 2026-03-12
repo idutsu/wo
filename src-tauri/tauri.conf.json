@@ -14,7 +14,6 @@
             {
                 "title": "を研究所",
                 "maximized": true,
-
                 "resizable": false
             }
         ],
@@ -26,6 +25,14 @@
         "active": true,
         "targets": ["nsis"],
         "icon": ["../src/assets/icons/favicon-32x32.png", "../src/assets/icons/favicon.ico"],
-        "resources": ["../pairs.sqlite3"]
+        "resources": ["../pairs.sqlite3"],
+        "windows": {
+            "nsis": {
+                "languages": ["Japanese"]
+            },
+            "wix": {
+                "language": "ja-JP"
+            }
+        }
     }
 }

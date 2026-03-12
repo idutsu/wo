@@ -1,22 +1,39 @@
 import Database from "@tauri-apps/plugin-sql";
 
-// WIKIPEDIAから文を取得する
-async function handleGetExampleSentencesClick(e) {
-    disableAllButtons(e.target);
+//WIKIPEDIAからランダムに文を取得する
+async function handleGetExampleSentencesClick(type = "both") {
+    disableAllButtons(wikiBtn);
 
     mainList.innerHTML = "<p>読み込み中・・・</p>";
     mainList.className = "example-sent-list";
 
     try {
-        const query = `
-            SELECT noun, verb FROM (
-                SELECT noun, verb FROM wo_sudachi_normal
-                UNION ALL
-                SELECT noun, verb FROM wo_sudachi_sahen
-            ) 
-            ORDER BY RANDOM() 
-            LIMIT 300
-        `;
+        let query = "";
+
+        if (type === "normal") {
+            query = `
+                SELECT noun, verb FROM wo_sudachi_normal 
+                ORDER BY RANDOM() 
+                LIMIT 300
+            `;
+        } else if (type === "sahen") {
+            query = `
+                SELECT noun, verb FROM wo_sudachi_sahen 
+                ORDER BY RANDOM() 
+                LIMIT 300
+            `;
+        } else {
+            query = `
+                SELECT noun, verb FROM (
+                    SELECT noun, verb FROM wo_sudachi_normal
+                    UNION ALL
+                    SELECT noun, verb FROM wo_sudachi_sahen
+                ) 
+                ORDER BY RANDOM() 
+                LIMIT 300
+            `;
+        }
+
         const rows = await db.select(query);
 
         const allNouns = await db.select("SELECT word FROM noun");
@@ -48,7 +65,7 @@ async function handleGetExampleSentencesClick(e) {
         mainList.innerHTML = "";
         mainList.appendChild(fragment);
     } catch (error) {
-        console.error("エラー：", error);
+        console.error("例文の取得に失敗しました：", error);
     } finally {
         setCurrentList();
         enableAllButtons();
@@ -57,7 +74,7 @@ async function handleGetExampleSentencesClick(e) {
 
 // お気に入り単語（名詞と動詞）から文を生成する
 async function handleGenerateSentencesClick(e) {
-    disableAllButtons(e.target);
+    disableAllButtons(randomBtn);
 
     mainList.innerHTML = "";
     mainList.className = "gen-sent-list";
@@ -96,7 +113,7 @@ async function handleGenerateSentencesClick(e) {
 
         mainList.appendChild(fragment);
     } catch (error) {
-        console.error("エラー：", error);
+        console.error("作文に失敗しました：", error);
     } finally {
         setCurrentList();
         enableAllButtons();
@@ -105,7 +122,7 @@ async function handleGenerateSentencesClick(e) {
 
 //お気に入り文を取得する
 async function handleGetFavoriteSentencesClick(e) {
-    disableAllButtons(e.target);
+    disableAllButtons(sentBtn);
 
     mainList.innerHTML = "";
     mainList.className = "fav-sent-list";
@@ -121,7 +138,7 @@ async function handleGetFavoriteSentencesClick(e) {
             mainList.prepend(li);
         }
     } catch (error) {
-        console.error("エラー：", error);
+        console.error("お気に入り文の取得に失敗しました：", error);
     } finally {
         setCurrentList();
         enableAllButtons();
@@ -152,7 +169,7 @@ async function handleGetFavoriteWordsClick(e) {
 
         mainList.appendChild(fragment);
     } catch (error) {
-        console.error("エラー：", error);
+        console.error("お気に入り単語の取得に失敗しました：", error);
     } finally {
         setCurrentList();
         enableAllButtons();
@@ -185,7 +202,7 @@ async function handleGetSentencesWithWordClick(e) {
                 mainList.prepend(li);
             }
         } catch (error) {
-            console.error("エラー：", error);
+            console.error("単語からの作文に失敗しました：", error);
         } finally {
             setCurrentList();
             enableAllButtons();
@@ -206,7 +223,7 @@ const handleSaveWordClick = async (e) => {
             await db.execute(`INSERT OR IGNORE INTO ${table} (word) VALUES ('${wordText}')`);
             btn.className = "delete-word-btn";
         } catch (error) {
-            console.error("単語保存失敗：", error);
+            console.error("単語の保存に失敗しました：", error);
         }
     } else if (e.target.classList.contains("delete-word-btn")) {
         const btn = e.target;
@@ -219,7 +236,7 @@ const handleSaveWordClick = async (e) => {
             await db.select(`DELETE FROM ${table} WHERE word = '${wordText}'`);
             btn.className = "good-word-btn";
         } catch (error) {
-            console.error("単語削除失敗：", error);
+            console.error("単語の削除に失敗しました：", error);
         }
     }
 };
@@ -234,7 +251,7 @@ const handleSaveSentenceClick = async (e) => {
             await db.execute(`INSERT OR IGNORE INTO sent (noun, verb) VALUES ('${noun}', '${verb}')`);
             btn.className = "delete-sent-btn";
         } catch (error) {
-            console.error("文保存失敗：", error);
+            console.error("文の保存に失敗しました：", error);
         }
     } else if (e.target.classList.contains("delete-sent-btn")) {
         const btn = e.target;
@@ -244,7 +261,7 @@ const handleSaveSentenceClick = async (e) => {
             await db.select(`DELETE FROM sent WHERE noun = '${noun}' AND verb = '${verb}'`);
             btn.className = "good-sent-btn";
         } catch (error) {
-            console.error("文削除失敗：", error);
+            console.error("文の削除に失敗しました：", error);
         }
     }
 };
@@ -262,16 +279,18 @@ const handleRegisterClick = async (e) => {
         try {
             await db.execute(`INSERT OR IGNORE INTO noun (word) VALUES ('${nounText}')`);
             nounInput.value = "";
+            nounBtn.click();
         } catch (error) {
-            console.error("名詞登録失敗：", error);
+            console.error("名詞の登録に失敗しました：", error);
         }
     } else if (verbText != "" && nounText === "") {
         if (!verbText) return;
         try {
             await db.execute(`INSERT OR IGNORE INTO verb (word) VALUES ('${verbText}')`);
             verbInput.value = "";
+            verbBtn.click();
         } catch (error) {
-            console.error("動詞登録失敗：", error);
+            console.error("動詞の登録に失敗しました：", error);
         }
     } else if (nounText != "" && verbText != "") {
         if (!nounText || !verbText) return;
@@ -279,15 +298,17 @@ const handleRegisterClick = async (e) => {
             await db.execute(`INSERT OR IGNORE INTO sent (noun, verb) VALUES ('${nounText}', '${verbText}')`);
             nounInput.value = "";
             verbInput.value = "";
+            sentBtn.click();
         } catch (error) {
-            console.error("文登録失敗：", error);
+            console.error("文の登録に失敗しました：", error);
         }
     }
 };
 
 const handleKeyup = (e) => {
+    if (e.isComposing) return;
     if (e.target.id === "registerNounInput" || e.target.id === "registerVerbInput") {
-        if ((e.key === "Enter" && !e.isComposing) || e.key === "Escape") {
+        if (e.key === "Enter" || e.key === "Escape") {
             e.target.blur();
         } else {
             const mainListClass = mainList.className;
@@ -326,6 +347,10 @@ const handleKeyup = (e) => {
             verbBtn.click();
         } else if (e.key === "a") {
             wikiBtn.click();
+        } else if (e.key === "q") {
+            handleGetExampleSentencesClick("normal");
+        } else if (e.key === "z") {
+            handleGetExampleSentencesClick("sahen");
         } else if (e.key === "Enter" && e.shiftKey) {
             const buttons = currentList[currentIndex].querySelectorAll("button");
             buttons[1]?.click();
@@ -349,6 +374,7 @@ const handleKeyup = (e) => {
 };
 
 const handleKeydown = (e) => {
+    if (e.isComposing) return;
     if (e.target.id === "registerNounInput" || e.target.id === "registerVerbInput") return;
 
     const keys = { right: "ArrowRight", left: "ArrowLeft", up: "ArrowUp", down: "ArrowDown" };
@@ -385,7 +411,6 @@ const handleKeydown = (e) => {
             if (currentList[i].style.display === "none") continue;
 
             const rect = currentList[i].getBoundingClientRect();
-
             const isTargetRow = isDown ? rect.top >= currentRect.bottom - 5 : rect.bottom <= currentRect.top + 5;
 
             if (isTargetRow) {
@@ -449,11 +474,18 @@ function enableAllButtons() {
 }
 
 const blockPhysicalMouse = (e) => {
-    if (e.isTrusted) {
+    if (e.isTrusted && !e.target.closest("a")) {
         e.stopPropagation();
         e.preventDefault();
     }
 };
+
+function forceRepaint(element) {
+    const originalDisplay = element.style.display;
+    element.style.display = "none";
+    void element.offsetHeight;
+    element.style.display = originalDisplay;
+}
 
 //初期化
 let db;
@@ -468,17 +500,9 @@ let wikiBtn = null;
 let registerBtn = null;
 let currentIndex = 0;
 let currentList = null;
+let resultArea = null;
 
 window.addEventListener("DOMContentLoaded", async () => {
-    try {
-        const DB = import.meta.env.VITE_DB;
-        db = await Database.load(DB);
-        console.log("DB接続完了");
-    } catch (error) {
-        console.error("DB接続失敗:", error);
-        document.getElementById("resultArea").innerHTML = `<p">DB接続失敗：${error}</p>`;
-    }
-
     mainList = document.getElementById("mainList");
     nounBtn = document.getElementById("nounBtn");
     verbBtn = document.getElementById("verbBtn");
@@ -488,6 +512,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     sentBtn = document.getElementById("sentBtn");
     wikiBtn = document.getElementById("wikiBtn");
     registerBtn = document.getElementById("registerBtn");
+    resultArea = document.getElementById("resultArea");
+
+    try {
+        const DB = import.meta.env.VITE_DB;
+        db = await Database.load(DB);
+        const version = await db.select("PRAGMA user_version;");
+        document.getElementById("version").textContent = "version " + version[0].user_version;
+    } catch (error) {
+        console.error("DB接続失敗:", error);
+        result.innerHTML = `<p">DB接続失敗：${error}</p>`;
+    }
 
     randomBtn.addEventListener("click", handleGenerateSentencesClick);
     sentBtn.addEventListener("click", handleGetFavoriteSentencesClick);
@@ -506,6 +541,18 @@ window.addEventListener("DOMContentLoaded", async () => {
     window.addEventListener("click", blockPhysicalMouse, { capture: true });
     window.addEventListener("mousedown", blockPhysicalMouse, { capture: true });
     window.addEventListener("contextmenu", blockPhysicalMouse, { capture: true });
+
+    nounInput.addEventListener("compositionend", () => {
+        setTimeout(() => {
+            forceRepaint(nounInput);
+        }, 10);
+    });
+
+    verbInput.addEventListener("compositionend", () => {
+        setTimeout(() => {
+            forceRepaint(verbInput);
+        }, 10);
+    });
 
     wikiBtn.click();
 });
